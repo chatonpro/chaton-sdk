@@ -1,0 +1,48 @@
+{
+    "name": "chaton/chaton-sdk",
+    "description": "Official SDK for ChatOn - License validation, auto-updates, and plugin management",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["chaton", "license", "sdk", "auto-update", "laravel"],
+    "homepage": "https://github.com/chaton/chaton-sdk",
+    "authors": [
+        {
+            "name": "ChatOn Team",
+            "email": "support@chaton.app"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0",
+        "illuminate/cache": "^11.0|^12.0",
+        "illuminate/http": "^11.0|^12.0",
+        "guzzlehttp/guzzle": "^7.8"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "orchestra/testbench": "^9.0",
+        "mockery/mockery": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Chaton\\SDK\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Chaton\\SDK\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Chaton\\SDK\\ChatonServiceProvider"
+            ],
+            "aliases": {
+                "ChatonLicense": "Chaton\\SDK\\Facades\\License"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
