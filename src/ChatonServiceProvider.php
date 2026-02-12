@@ -7,7 +7,7 @@ use Chaton\SDK\Contracts\LicenseInterface;
 use Chaton\SDK\Middleware\EnsureLicenseValid;
 use Chaton\SDK\Middleware\EnsureSaasEnabled;
 
-class LicenseServiceProvider extends ServiceProvider
+class ChatonServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
