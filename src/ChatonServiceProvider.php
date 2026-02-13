@@ -2,10 +2,10 @@
 
 namespace Chaton\SDK;
 
-use Illuminate\Support\ServiceProvider;
 use Chaton\SDK\Contracts\LicenseInterface;
 use Chaton\SDK\Middleware\EnsureLicenseValid;
 use Chaton\SDK\Middleware\EnsureSaasEnabled;
+use Illuminate\Support\ServiceProvider;
 
 class ChatonServiceProvider extends ServiceProvider
 {
@@ -15,7 +15,7 @@ class ChatonServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/chaton-license.php',
+            __DIR__.'/../config/chaton-license.php',
             'chaton-license'
         );
 
@@ -44,7 +44,7 @@ class ChatonServiceProvider extends ServiceProvider
         // Publish configuration
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../config/chaton-license.php' => config_path('chaton-license.php'),
+                __DIR__.'/../config/chaton-license.php' => config_path('chaton-license.php'),
             ], 'chaton-license-config');
         }
 

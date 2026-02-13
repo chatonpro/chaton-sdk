@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\Log;
 class LicenseManager implements LicenseInterface
 {
     protected LicenseClient $client;
+
     protected LicenseCache $cache;
+
     protected SignatureVerifier $verifier;
+
     protected string $publicKey;
 
     public function __construct(
@@ -31,15 +34,13 @@ class LicenseManager implements LicenseInterface
     {
         try {
             $response = $this->client->activate($purchaseCode, $domain);
-            
-            // Verify signature
+
             $data = $this->verifier->verifyAndExtract($response, $this->publicKey);
 
-            if (!$data['success']) {
+            if (! $data['success']) {
                 throw new LicenseException($data['message'] ?? 'Activation failed');
             }
 
-            // Store in cache
             $licenseData = [
                 'purchase_code' => $purchaseCode,
                 'domain' => $domain,
@@ -77,17 +78,15 @@ class LicenseManager implements LicenseInterface
      */
     public function validate(bool $forceRemote = false): array
     {
-        // Get cached license data
         $cachedData = $this->cache->get();
 
-        if (!$cachedData) {
+        if (! $cachedData) {
             throw LicenseException::licenseNotActivated();
         }
 
-        // Check if we need to validate remotely
         $needsValidation = $forceRemote || $this->cache->needsDailyValidation();
 
-        if (!$needsValidation) {
+        if (! $needsValidation) {
             return [
                 'success' => true,
                 'source' => 'cache',
@@ -96,21 +95,18 @@ class LicenseManager implements LicenseInterface
             ];
         }
 
-        // Validate remotely
         try {
             $response = $this->client->validate(
                 $cachedData['purchase_code'],
                 $cachedData['domain']
             );
 
-            // Verify signature
             $data = $this->verifier->verifyAndExtract($response, $this->publicKey);
 
-            if (!$data['success']) {
+            if (! $data['success']) {
                 throw new LicenseException($data['message'] ?? 'Validation failed');
             }
 
-            // Update cache
             $licenseData = [
                 'purchase_code' => $cachedData['purchase_code'],
                 'domain' => $cachedData['domain'],
@@ -131,7 +127,6 @@ class LicenseManager implements LicenseInterface
             ];
 
         } catch (LicenseException $e) {
-            // Check if we're within grace period
             if ($this->cache->isWithinGracePeriod()) {
                 Log::warning('License server unreachable, using cached data within grace period', [
                     'error' => $e->getMessage(),
@@ -145,7 +140,6 @@ class LicenseManager implements LicenseInterface
                 ];
             }
 
-            // Grace period expired
             Log::error('License validation failed and grace period expired', [
                 'error' => $e->getMessage(),
             ]);
@@ -161,7 +155,7 @@ class LicenseManager implements LicenseInterface
     {
         $cachedData = $this->cache->get();
 
-        if (!$cachedData) {
+        if (! $cachedData) {
             throw LicenseException::licenseNotActivated();
         }
 
@@ -171,10 +165,8 @@ class LicenseManager implements LicenseInterface
                 $cachedData['domain']
             );
 
-            // Verify signature
             $data = $this->verifier->verifyAndExtract($response, $this->publicKey);
 
-            // Clear cache
             $this->cache->clear();
 
             Log::info('License deactivated successfully', [
@@ -201,6 +193,7 @@ class LicenseManager implements LicenseInterface
     {
         try {
             $result = $this->validate();
+
             return $result['success'] ?? false;
         } catch (LicenseException $e) {
             return false;
@@ -213,6 +206,7 @@ class LicenseManager implements LicenseInterface
     public function getLicenseType(): ?string
     {
         $cachedData = $this->cache->get();
+
         return $cachedData['license_type'] ?? null;
     }
 
@@ -221,22 +215,36 @@ class LicenseManager implements LicenseInterface
      */
     public function isSaasEnabled(): bool
     {
+        return $this->hasFeature('organizations') 
+            || $this->hasFeature('subscription_plans')
+            || $this->hasFeature('billing');
+    }
+
+    /**
+     * Check if specific feature is enabled
+     */
+    public function hasFeature(string $feature): bool
+    {
         $licenseType = $this->getLicenseType();
 
-        if (!$licenseType) {
+        if (! $licenseType) {
             return false;
         }
 
         $cachedData = $this->cache->get();
         $features = $cachedData['features'] ?? [];
 
-        // Check from server response first
-        if (isset($features['saas'])) {
-            return $features['saas'] === true;
+        if (isset($features[$feature])) {
+            return $features[$feature] === true;
         }
 
-        // Fallback to config
-        return config("chaton-license.features.saas.{$licenseType}", false);
+        if ($feature === 'organizations' || $feature === 'subscription_plans' || $feature === 'billing') {
+            if (isset($features['saas'])) {
+                return $features['saas'] === true;
+            }
+        }
+
+        return config("chaton-license.features.{$feature}.{$licenseType}", false);
     }
 
     /**
@@ -245,6 +253,7 @@ class LicenseManager implements LicenseInterface
     public function getFeatures(): array
     {
         $cachedData = $this->cache->get();
+
         return $cachedData['features'] ?? [];
     }
 
@@ -267,7 +276,6 @@ class LicenseManager implements LicenseInterface
             return $configDomain;
         }
 
-        // Auto-detect from request
         if (app()->runningInConsole()) {
             return parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost';
         }

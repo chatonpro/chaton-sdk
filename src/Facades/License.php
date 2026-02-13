@@ -2,8 +2,8 @@
 
 namespace Chaton\SDK\Facades;
 
-use Illuminate\Support\Facades\Facade;
 use Chaton\SDK\Contracts\LicenseInterface;
+use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static array activate(string $purchaseCode, string $domain)

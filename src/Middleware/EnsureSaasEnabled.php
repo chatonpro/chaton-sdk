@@ -2,10 +2,10 @@
 
 namespace Chaton\SDK\Middleware;
 
+use Chaton\SDK\Contracts\LicenseInterface;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Chaton\SDK\Contracts\LicenseInterface;
 
 class EnsureSaasEnabled
 {
@@ -22,12 +22,12 @@ class EnsureSaasEnabled
     public function handle(Request $request, Closure $next): Response
     {
         // First check if license is valid
-        if (!$this->license->isValid()) {
+        if (! $this->license->isValid()) {
             return $this->handleFeatureNotAvailable($request, 'Invalid license');
         }
 
         // Check if SAAS is enabled
-        if (!$this->license->isSaasEnabled()) {
+        if (! $this->license->isSaasEnabled()) {
             return $this->handleFeatureNotAvailable(
                 $request,
                 'SAAS features are only available with Extended license'

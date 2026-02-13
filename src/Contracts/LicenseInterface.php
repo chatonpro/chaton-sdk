@@ -35,6 +35,11 @@ interface LicenseInterface
     public function isSaasEnabled(): bool;
 
     /**
+     * Check if specific feature is enabled
+     */
+    public function hasFeature(string $feature): bool;
+
+    /**
      * Get all available features for current license
      */
     public function getFeatures(): array;

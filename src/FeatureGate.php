@@ -19,7 +19,7 @@ class FeatureGate
      */
     public function isEnabled(string $feature): bool
     {
-        if (!$this->license->isValid()) {
+        if (! $this->license->isValid()) {
             return false;
         }
 
@@ -33,7 +33,7 @@ class FeatureGate
         // Fallback to config-based feature mapping
         $licenseType = $this->license->getLicenseType();
 
-        if (!$licenseType) {
+        if (! $licenseType) {
             return false;
         }
 
@@ -45,7 +45,7 @@ class FeatureGate
      */
     public function ensureEnabled(string $feature): void
     {
-        if (!$this->isEnabled($feature)) {
+        if (! $this->isEnabled($feature)) {
             throw LicenseException::featureNotAvailable($feature);
         }
     }
@@ -63,7 +63,7 @@ class FeatureGate
      */
     public function getEnabledFeatures(): array
     {
-        if (!$this->license->isValid()) {
+        if (! $this->license->isValid()) {
             return [];
         }
 
@@ -99,7 +99,7 @@ class FeatureGate
     public function hasAll(array $features): bool
     {
         foreach ($features as $feature) {
-            if (!$this->isEnabled($feature)) {
+            if (! $this->isEnabled($feature)) {
                 return false;
             }
         }

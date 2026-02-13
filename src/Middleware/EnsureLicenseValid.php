@@ -2,11 +2,11 @@
 
 namespace Chaton\SDK\Middleware;
 
+use Chaton\SDK\Contracts\LicenseInterface;
+use Chaton\SDK\Exceptions\LicenseException;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Chaton\SDK\Contracts\LicenseInterface;
-use Chaton\SDK\Exceptions\LicenseException;
 
 class EnsureLicenseValid
 {
@@ -23,7 +23,7 @@ class EnsureLicenseValid
     public function handle(Request $request, Closure $next): Response
     {
         try {
-            if (!$this->license->isValid()) {
+            if (! $this->license->isValid()) {
                 return $this->handleInvalidLicense($request);
             }
 
@@ -58,6 +58,7 @@ class EnsureLicenseValid
 
         // In non-strict mode, show warning but allow access
         session()->flash('license_warning', $message ?? 'Your license needs attention.');
+
         return $next($request);
     }
 }

@@ -2,19 +2,20 @@
 
 namespace Chaton\SDK;
 
+use Chaton\SDK\Exceptions\LicenseException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Chaton\SDK\Exceptions\LicenseException;
 
 class LicenseClient
 {
     protected Client $client;
+
     protected string $serverUrl;
 
     public function __construct()
     {
         $this->serverUrl = rtrim(config('chaton-license.server_url'), '/');
-        
+
         $this->client = new Client([
             'base_uri' => $this->serverUrl,
             'timeout' => config('chaton-license.timeout.request', 30),
@@ -65,7 +66,7 @@ class LicenseClient
      */
     public function getFeatures(string $licenseType): array
     {
-        return $this->request('GET', '/api/features/' . $licenseType);
+        return $this->request('GET', '/api/features/'.$licenseType);
     }
 
     /**
@@ -75,13 +76,13 @@ class LicenseClient
     {
         try {
             $options = [];
-            
-            if (!empty($data)) {
+
+            if (! empty($data)) {
                 $options['json'] = $data;
             }
 
             $response = $this->client->request($method, $endpoint, $options);
-            
+
             $body = (string) $response->getBody();
             $decoded = json_decode($body, true);
 
@@ -97,13 +98,13 @@ class LicenseClient
                 $response = $e->getResponse();
                 $body = (string) $response->getBody();
                 $decoded = json_decode($body, true);
-                
+
                 if ($decoded && isset($decoded['message'])) {
                     // Return the error response so it can be handled properly
                     return $decoded;
                 }
             }
-            
+
             \Log::error('License server connection error', [
                 'error' => $e->getMessage(),
                 'endpoint' => $endpoint,
