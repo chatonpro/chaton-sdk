@@ -30,9 +30,15 @@ class LicenseCache
             'cached_at' => Carbon::now()->toIso8601String(),
         ]);
 
+        $payload = [
+            'data' => $data,
+            'signature' => $this->generateSignature($data),
+            'stored_at' => time(),
+        ];
+
         Cache::driver($this->driver)->put(
             $this->cacheKey.'data',
-            $data,
+            $payload,
             $this->ttl
         );
     }
@@ -42,7 +48,38 @@ class LicenseCache
      */
     public function get(): ?array
     {
-        return Cache::driver($this->driver)->get($this->cacheKey.'data');
+        $cached = Cache::driver($this->driver)->get($this->cacheKey.'data');
+
+        if (!$cached || !is_array($cached)) {
+            return null;
+        }
+
+        if (!isset($cached['signature']) || !isset($cached['data'])) {
+            return $cached;
+        }
+
+        $expectedSignature = $this->generateSignature($cached['data']);
+
+        if (!hash_equals($cached['signature'], $expectedSignature)) {
+            \Illuminate\Support\Facades\Log::notice('License cache signature mismatch - revalidating');
+            
+            $this->clear();
+            
+            try {
+                $manager = app(\Chaton\SDK\Contracts\LicenseInterface::class);
+                $manager->validate(force: true);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto-revalidation failed', ['error' => $e->getMessage()]);
+            }
+            
+            return null;
+        }
+
+        if (isset($cached['stored_at']) && $cached['stored_at'] < (time() - $this->ttl)) {
+            return null;
+        }
+
+        return $cached['data'];
     }
 
     /**
@@ -105,5 +142,16 @@ class LicenseCache
         }
 
         return $lastValidation->diffInHours(Carbon::now()) >= 24;
+    }
+
+    protected function generateSignature(array $data): string
+    {
+        $appKey = config('app.key');
+        
+        if (!$appKey) {
+            throw new \RuntimeException('Application key not set');
+        }
+
+        return hash_hmac('sha256', json_encode($data), $appKey);
     }
 }
