@@ -93,14 +93,15 @@ class LicenseClient
             return $decoded;
 
         } catch (GuzzleException $e) {
-            // Check if we have a response body (HTTP error like 409, 400, etc)
+            // Check if we have a response body (HTTP error like 409, 400, 403, etc)
             if (method_exists($e, 'hasResponse') && $e->hasResponse()) {
                 $response = $e->getResponse();
                 $body = (string) $response->getBody();
                 $decoded = json_decode($body, true);
 
                 if ($decoded && isset($decoded['message'])) {
-                    // Return the error response so it can be handled properly
+                    // Return the error response with all details so it can be handled properly
+                    // This includes: success, message, error_code, and details
                     return $decoded;
                 }
             }
