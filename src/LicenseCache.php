@@ -50,28 +50,28 @@ class LicenseCache
     {
         $cached = Cache::driver($this->driver)->get($this->cacheKey.'data');
 
-        if (!$cached || !is_array($cached)) {
+        if (! $cached || ! is_array($cached)) {
             return null;
         }
 
-        if (!isset($cached['signature']) || !isset($cached['data'])) {
+        if (! isset($cached['signature']) || ! isset($cached['data'])) {
             return $cached;
         }
 
         $expectedSignature = $this->generateSignature($cached['data']);
 
-        if (!hash_equals($cached['signature'], $expectedSignature)) {
+        if (! hash_equals($cached['signature'], $expectedSignature)) {
             \Illuminate\Support\Facades\Log::notice('License cache signature mismatch - revalidating');
-            
+
             $this->clear();
-            
+
             try {
                 $manager = app(\Chaton\SDK\Contracts\LicenseInterface::class);
                 $manager->validate(force: true);
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::warning('Auto-revalidation failed', ['error' => $e->getMessage()]);
             }
-            
+
             return null;
         }
 
@@ -147,8 +147,8 @@ class LicenseCache
     protected function generateSignature(array $data): string
     {
         $appKey = config('app.key');
-        
-        if (!$appKey) {
+
+        if (! $appKey) {
             throw new \RuntimeException('Application key not set');
         }
 

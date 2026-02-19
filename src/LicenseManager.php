@@ -215,7 +215,7 @@ class LicenseManager implements LicenseInterface
      */
     public function isSaasEnabled(): bool
     {
-        return $this->hasFeature('organizations') 
+        return $this->hasFeature('organizations')
             || $this->hasFeature('subscription_plans')
             || $this->hasFeature('billing');
     }
