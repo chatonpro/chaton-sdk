@@ -1,10 +1,10 @@
 {
-    "name": "chaton/chaton-sdk",
+    "name": "chatonpro/chaton-sdk",
     "description": "Official SDK for ChatOn - License validation, auto-updates, and plugin management",
     "type": "library",
     "license": "MIT",
     "keywords": ["chaton", "license", "sdk", "auto-update", "laravel"],
-    "homepage": "https://github.com/chaton/chaton-sdk",
+    "homepage": "https://github.com/chatonpro/chaton-sdk",
     "authors": [
         {
             "name": "ChatOn Team",
