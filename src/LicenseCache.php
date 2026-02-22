@@ -17,8 +17,7 @@ class LicenseCache
     {
         $this->cacheKey = config('chaton-license.cache.key_prefix', 'chaton_license_');
         $this->ttl = config('chaton-license.cache.ttl', 86400);
-        // Always use database driver to avoid file permission issues
-        $this->driver = 'database';
+        $this->driver = config('chaton-license.cache.store', 'license');
     }
 
     /**
@@ -36,7 +35,7 @@ class LicenseCache
             'stored_at' => time(),
         ];
 
-        Cache::driver($this->driver)->put(
+        Cache::store($this->driver)->put(
             $this->cacheKey.'data',
             $payload,
             $this->ttl
@@ -48,7 +47,7 @@ class LicenseCache
      */
     public function get(): ?array
     {
-        $cached = Cache::driver($this->driver)->get($this->cacheKey.'data');
+        $cached = Cache::store($this->driver)->get($this->cacheKey.'data');
 
         if (! $cached || ! is_array($cached)) {
             return null;
@@ -105,7 +104,7 @@ class LicenseCache
      */
     public function clear(): void
     {
-        Cache::driver($this->driver)->forget($this->cacheKey.'data');
+        Cache::store($this->driver)->forget($this->cacheKey.'data');
     }
 
     /**
@@ -113,7 +112,7 @@ class LicenseCache
      */
     public function storeLastValidation(): void
     {
-        Cache::driver($this->driver)->put(
+        Cache::store($this->driver)->put(
             $this->cacheKey.'last_validation',
             Carbon::now()->toIso8601String(),
             $this->ttl
@@ -125,7 +124,7 @@ class LicenseCache
      */
     public function getLastValidation(): ?Carbon
     {
-        $timestamp = Cache::driver($this->driver)->get($this->cacheKey.'last_validation');
+        $timestamp = Cache::store($this->driver)->get($this->cacheKey.'last_validation');
 
         return $timestamp ? Carbon::parse($timestamp) : null;
     }
