@@ -10,7 +10,7 @@ return [
     | This cannot be changed via .env to prevent tampering
     |
     */
-    'server_url' => 'https://license.o-x.cloud',
+    'server_url' => 'https://api.chaton.pro',
 
     /*
     |--------------------------------------------------------------------------
