@@ -39,7 +39,8 @@
                 "Chaton\\SDK\\ChatonServiceProvider"
             ],
             "aliases": {
-                "ChatonLicense": "Chaton\\SDK\\Facades\\License"
+                "ChatonLicense": "Chaton\\SDK\\Facades\\License",
+                "ChatonPluginUpdater": "Chaton\\SDK\\Facades\\PluginUpdater"
             }
         }
     },

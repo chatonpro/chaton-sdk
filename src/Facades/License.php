@@ -12,10 +12,11 @@ use Illuminate\Support\Facades\Facade;
  * @method static bool isValid()
  * @method static string|null getLicenseType()
  * @method static bool isSaasEnabled()
+ * @method static bool hasFeature(string $feature)
  * @method static array getFeatures()
  * @method static array|null getLicenseInfo()
  *
- * @see \Egiw\ChatonLicense\LicenseManager
+ * @see \Chaton\SDK\LicenseManager
  */
 class License extends Facade
 {
